@@ -61,11 +61,14 @@
             this.trigger.addEventListener("click", () => this.toggleOpen());
 
             this.optionsList.addEventListener("click", (event) => {
+                event.stopPropagation(); // Предотвращаем всплытие иначе дойдёт до document и там закроет
                 const option = event.target.closest(
                     ".select__option[data-value]",
                 );
 
-                if (option) this.selectOption(option.dataset.value);
+                if (option) {
+                    this.selectOption(option.dataset.value);
+                }
             });
 
             this.searchInput.addEventListener("input", () => {
@@ -73,7 +76,9 @@
             });
 
             document.addEventListener("click", (event) => {
-                if (!this.root.contains(event.target)) this.close();
+                if (!this.root.contains(event.target)) {
+                    this.close();
+                }
             });
         }
 
@@ -87,7 +92,6 @@
 
         open() {
             this.root.classList.add("is-open");
-            this.trigger.setAttribute("aria-expanded", "true");
             this.positionDropdown();
 
             if (this.isSearchable) {
@@ -98,7 +102,6 @@
 
         close() {
             this.root.classList.remove("is-open");
-            this.trigger.setAttribute("aria-expanded", "false");
         }
 
         positionDropdown() {
@@ -107,10 +110,12 @@
                 "select__dropdown--up",
             );
 
-            const { bottom } = this.trigger.getBoundingClientRect();
+            const { top, bottom } = this.trigger.getBoundingClientRect();
             const spaceBelow = window.innerHeight - bottom;
-            const direction =
-                spaceBelow < this.dropdown.offsetHeight ? "up" : "down";
+            const spaceAbove = top;
+            const direction = spaceBelow >= spaceAbove ? "down" : "up";
+            const maxHeight = direction === "down" ? spaceBelow : spaceAbove;
+            this.dropdown.style.maxHeight = `${maxHeight - 10}px`;
 
             this.dropdown.classList.add(`select__dropdown--${direction}`);
         }
@@ -170,7 +175,6 @@
                 }
             } else {
                 this.selected = new Set([value]);
-                // this.close();
             }
 
             this.updateValueText();

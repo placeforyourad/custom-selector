@@ -25,11 +25,7 @@
             </fieldset>
 
             <div class="select" id="select">
-                <button
-                    type="button"
-                    class="select__trigger"
-                    aria-expanded="false"
-                >
+                <button type="button" class="select__trigger">
                     <span class="select__value">ВЫБЕРИТЕ БРЕНД</span>
                     <span class="select__arrow" aria-hidden="true"></span>
                 </button>
@@ -40,7 +36,9 @@
                         class="select__search"
                         placeholder="Поиск"
                     />
-                    <ul class="select__options"></ul>
+                    <div class="select__wrapper">
+                        <ul class="select__options"></ul>
+                    </div>
                 </div>
             </div>
         </main>
