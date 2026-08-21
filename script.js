@@ -55,6 +55,14 @@
 
             this.bindEvents();
             this.renderOptions(this.options);
+
+            this.resizeObserver = new ResizeObserver(() => {
+                if (this.root.classList.contains("is-open")) {
+                    this.updateDropdownHeight();
+                }
+            });
+
+            this.resizeObserver.observe(this.trigger);
         }
 
         bindEvents() {
@@ -112,12 +120,23 @@
 
             const { top, bottom } = this.trigger.getBoundingClientRect();
             const spaceBelow = window.innerHeight - bottom;
-            const spaceAbove = top;
-            const direction = spaceBelow >= spaceAbove ? "down" : "up";
-            const maxHeight = direction === "down" ? spaceBelow : spaceAbove;
-            this.dropdown.style.maxHeight = `${maxHeight - 10}px`;
+            const direction = spaceBelow >= top ? "down" : "up";
 
             this.dropdown.classList.add(`select__dropdown--${direction}`);
+            this.setMaxHeight(direction === "down" ? spaceBelow : top);
+        }
+
+        updateDropdownHeight() {
+            // Пересчитывает max-height
+            const isUp = this.dropdown.classList.contains(
+                "select__dropdown--up",
+            );
+            const { top, bottom } = this.trigger.getBoundingClientRect();
+            this.setMaxHeight(isUp ? top : window.innerHeight - bottom);
+        }
+
+        setMaxHeight(space) {
+            this.dropdown.style.maxHeight = `${space - 10}px`;
         }
 
         resetSearch() {
