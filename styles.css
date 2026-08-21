@@ -100,11 +100,12 @@ h1 {
     background-color: rgb(250, 239, 239);
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
-    overflow-y: auto;
+    overflow: hidden;
 }
 
 .select.is-open .select__dropdown {
-    display: block;
+    display: flex;
+    flex-direction: column;
 }
 
 .select__dropdown--down {
@@ -117,6 +118,7 @@ h1 {
 
 .select__search {
     display: none;
+    flex-shrink: 0;
     width: 100%;
     padding: 10px 14px;
     border: none;
@@ -134,12 +136,16 @@ h1 {
     outline-offset: -2px;
 }
 
+.select__wrapper {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+}
+
 .select__options {
     list-style: none;
     margin: 0;
     padding: 4px 0;
-    max-height: 100%;
-    overflow-y: auto;
 }
 
 .select__option {
