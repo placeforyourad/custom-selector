@@ -66,7 +66,7 @@ class CustomSelect {
 
     bindEvents() {
         this.optionsList.addEventListener("click", (event) => {
-            event.stopPropagation(); // Предотвращаем всплытие иначе дойдёт до document и там закроет
+            event.preventDefault(); // изначально было stopPropagation но в итоге было выбрано event.defaultPrevented
             const option = event.target.closest(".select__option[data-value]");
 
             if (option) {
@@ -81,16 +81,21 @@ class CustomSelect {
         this.valueEl.addEventListener("click", (event) => {
             const tag = event.target.closest(".select__tag");
 
-            // stopPropagation только тут, а не сразу для всего valueEl иначе клик по плейсхолдеру тоже перестанет открывать дропдаун
             if (tag) {
-                event.stopPropagation();
+                event.preventDefault();
                 this.deselectOption(tag.dataset.value);
             }
         });
 
-        this.trigger.addEventListener("click", () => this.toggleOpen());
+        this.trigger.addEventListener("click", (event) => {
+            if (event.defaultPrevented) return;
+
+            this.toggleOpen();
+        });
 
         document.addEventListener("click", (event) => {
+            if (event.defaultPrevented) return;
+
             if (!this.root.contains(event.target)) {
                 this.close();
             }
