@@ -270,14 +270,18 @@ class CustomSelect {
     }
 }
 
-const select = new CustomSelect(document.getElementById("select"), BRANDS);
+document.addEventListener("DOMContentLoaded", function () {
+    const select = new CustomSelect(document.getElementById("select"), BRANDS);
 
-document.getElementById("toggle-search").addEventListener("change", (event) => {
-    select.searchable = event.target.checked;
+    document
+        .getElementById("toggle-search")
+        .addEventListener("change", (event) => {
+            select.searchable = event.target.checked;
+        });
+
+    document
+        .getElementById("toggle-multiple")
+        .addEventListener("change", (event) => {
+            select.multiple = event.target.checked;
+        });
 });
-
-document
-    .getElementById("toggle-multiple")
-    .addEventListener("change", (event) => {
-        select.multiple = event.target.checked;
-    });
