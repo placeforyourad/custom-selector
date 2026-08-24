@@ -65,8 +65,19 @@ class CustomSelect {
     }
 
     bindEvents() {
+        this.trigger.addEventListener("click", () => this.toggleOpen());
+
+        this.valueEl.addEventListener("click", (event) => {
+            const tag = event.target.closest(".select__tag");
+
+            if (tag) {
+                event.stopPropagation();
+                this.deselectOption(tag.dataset.value);
+            }
+        });
+
         this.optionsList.addEventListener("click", (event) => {
-            event.preventDefault(); // изначально было stopPropagation но в итоге было выбрано event.defaultPrevented
+            event.stopPropagation();
             const option = event.target.closest(".select__option[data-value]");
 
             if (option) {
@@ -78,24 +89,7 @@ class CustomSelect {
             this.renderOptions(this.getFilteredOptions());
         });
 
-        this.valueEl.addEventListener("click", (event) => {
-            const tag = event.target.closest(".select__tag");
-
-            if (tag) {
-                event.preventDefault();
-                this.deselectOption(tag.dataset.value);
-            }
-        });
-
-        this.trigger.addEventListener("click", (event) => {
-            if (event.defaultPrevented) return;
-
-            this.toggleOpen();
-        });
-
         document.addEventListener("click", (event) => {
-            if (event.defaultPrevented) return;
-
             if (!this.root.contains(event.target)) {
                 this.close();
             }
