@@ -65,18 +65,6 @@ class CustomSelect {
     }
 
     bindEvents() {
-        this.trigger.addEventListener("click", () => this.toggleOpen());
-
-        this.valueEl.addEventListener("click", (event) => {
-            const tag = event.target.closest(".select__tag");
-
-            // stopPropagation только тут, а не сразу для всего valueEl иначе клик по плейсхолдеру тоже перестанет открывать дропдаун
-            if (tag) {
-                event.stopPropagation();
-                this.deselectOption(tag.dataset.value);
-            }
-        });
-
         this.optionsList.addEventListener("click", (event) => {
             event.stopPropagation(); // Предотвращаем всплытие иначе дойдёт до document и там закроет
             const option = event.target.closest(".select__option[data-value]");
@@ -89,6 +77,18 @@ class CustomSelect {
         this.searchInput.addEventListener("input", () => {
             this.renderOptions(this.getFilteredOptions());
         });
+
+        this.valueEl.addEventListener("click", (event) => {
+            const tag = event.target.closest(".select__tag");
+
+            // stopPropagation только тут, а не сразу для всего valueEl иначе клик по плейсхолдеру тоже перестанет открывать дропдаун
+            if (tag) {
+                event.stopPropagation();
+                this.deselectOption(tag.dataset.value);
+            }
+        });
+
+        this.trigger.addEventListener("click", () => this.toggleOpen());
 
         document.addEventListener("click", (event) => {
             if (!this.root.contains(event.target)) {
