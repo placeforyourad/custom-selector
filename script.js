@@ -67,11 +67,19 @@ class CustomSelect {
     bindEvents() {
         this.trigger.addEventListener("click", () => this.toggleOpen());
 
+        this.valueEl.addEventListener("click", (event) => {
+            const tag = event.target.closest(".select__tag");
+
+            // stopPropagation только тут, а не сразу для всего valueEl иначе клик по плейсхолдеру тоже перестанет открывать дропдаун
+            if (tag) {
+                event.stopPropagation();
+                this.deselectOption(tag.dataset.value);
+            }
+        });
+
         this.optionsList.addEventListener("click", (event) => {
             event.stopPropagation(); // Предотвращаем всплытие иначе дойдёт до document и там закроет
-            const option = event.target.closest(
-                ".select__option[data-value]",
-            );
+            const option = event.target.closest(".select__option[data-value]");
 
             if (option) {
                 this.selectOption(option.dataset.value);
@@ -127,9 +135,7 @@ class CustomSelect {
 
     updateDropdownHeight() {
         // Пересчитывает max-height
-        const isUp = this.dropdown.classList.contains(
-            "select__dropdown--up",
-        );
+        const isUp = this.dropdown.classList.contains("select__dropdown--up");
         const { top, bottom } = this.trigger.getBoundingClientRect();
         this.setMaxHeight(isUp ? top : window.innerHeight - bottom);
     }
@@ -195,14 +201,36 @@ class CustomSelect {
             this.selected = new Set([value]);
         }
 
-        this.updateValueText();
+        this.renderValue();
         this.renderOptions(this.getFilteredOptions());
     }
 
-    updateValueText() {
-        this.valueEl.textContent = this.selected.size
-            ? [...this.selected].join(", ")
-            : PLACEHOLDER;
+    deselectOption(value) {
+        this.selected.delete(value);
+        this.renderValue();
+        this.renderOptions(this.getFilteredOptions());
+    }
+
+    renderValue() {
+        this.valueEl.replaceChildren();
+
+        if (this.selected.size === 0) {
+            this.valueEl.textContent = PLACEHOLDER;
+            return;
+        }
+
+        this.selected.forEach((value) =>
+            this.valueEl.append(this.createTag(value)),
+        );
+    }
+
+    createTag(value) {
+        const tag = document.createElement("span");
+        tag.className = "select__tag";
+        tag.dataset.value = value;
+        tag.textContent = value;
+
+        return tag;
     }
 
     setSearchable(isSearchable) {
@@ -218,18 +246,16 @@ class CustomSelect {
             this.selected = new Set([[...this.selected].at(-1)]);
         }
 
-        this.updateValueText();
+        this.renderValue();
         this.renderOptions(this.getFilteredOptions());
     }
 }
 
 const select = new CustomSelect(document.getElementById("select"), BRANDS);
 
-document
-    .getElementById("toggle-search")
-    .addEventListener("change", (event) => {
-        select.setSearchable(event.target.checked);
-    });
+document.getElementById("toggle-search").addEventListener("change", (event) => {
+    select.setSearchable(event.target.checked);
+});
 
 document
     .getElementById("toggle-multiple")

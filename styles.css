@@ -86,9 +86,29 @@ h1 {
 }
 
 .select__value {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: break-spaces;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.select__tag {
+    padding: 2px 8px;
+    background: var(--color-accent);
+    border-radius: calc(var(--border-radius) / 2);
+    font-size: 13px;
+    line-height: 1.4;
+    cursor: pointer;
+}
+
+.select__tag:hover {
+    background: var(--border-color);
+    color: var(--background);
+}
+
+.select__tag::after {
+    content: "×";
+    margin-left: 6px;
+    font-weight: 700;
 }
 
 .select__dropdown {
