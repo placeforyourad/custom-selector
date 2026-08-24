@@ -194,20 +194,22 @@ class CustomSelect {
         if (this.isMultiple) {
             if (this.selected.has(value)) {
                 this.selected.delete(value);
+                this.removeTag(value);
             } else {
                 this.selected.add(value);
+                this.addTag(value);
             }
         } else {
             this.selected = new Set([value]);
+            this.valueEl.replaceChildren(this.createTag(value));
         }
 
-        this.renderValue();
         this.renderOptions(this.getFilteredOptions());
     }
 
     deselectOption(value) {
         this.selected.delete(value);
-        this.renderValue();
+        this.removeTag(value);
         this.renderOptions(this.getFilteredOptions());
     }
 
@@ -224,6 +226,25 @@ class CustomSelect {
         );
     }
 
+    addTag(value) {
+        if (this.selected.size === 1) {
+            this.valueEl.replaceChildren();
+        }
+
+        this.valueEl.append(this.createTag(value));
+    }
+
+    removeTag(value) {
+        const tag = [...this.valueEl.children].find(
+            (child) => child.dataset.value === value,
+        );
+        tag.remove();
+
+        if (this.selected.size === 0) {
+            this.valueEl.textContent = PLACEHOLDER;
+        }
+    }
+
     createTag(value) {
         const tag = document.createElement("span");
         tag.className = "select__tag";
@@ -233,19 +254,17 @@ class CustomSelect {
         return tag;
     }
 
-    setSearchable(isSearchable) {
-        this.isSearchable = isSearchable;
-        this.root.classList.toggle("has-search", isSearchable);
+    set searchable(value) {
+        this.isSearchable = value;
+        this.root.classList.toggle("has-search", value);
         this.resetSearch();
     }
 
-    setMultiple(isMultiple) {
-        this.isMultiple = isMultiple;
-
-        if (!isMultiple && this.selected.size > 1) {
+    set multiple(value) {
+        this.isMultiple = value;
+        if (!value && this.selected.size > 1) {
             this.selected = new Set([[...this.selected].at(-1)]);
         }
-
         this.renderValue();
         this.renderOptions(this.getFilteredOptions());
     }
@@ -254,11 +273,11 @@ class CustomSelect {
 const select = new CustomSelect(document.getElementById("select"), BRANDS);
 
 document.getElementById("toggle-search").addEventListener("change", (event) => {
-    select.setSearchable(event.target.checked);
+    select.searchable = event.target.checked;
 });
 
 document
     .getElementById("toggle-multiple")
     .addEventListener("change", (event) => {
-        select.setMultiple(event.target.checked);
+        select.multiple = event.target.checked;
     });
