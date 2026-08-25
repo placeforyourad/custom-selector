@@ -41,14 +41,47 @@ class CustomSelect extends HTMLElement {
     static formAssociated = true;
 
     _options = BRANDS;
-    selected = new Set();
-    isMultiple = false;
-    isSearchable = false;
+    _selected = new Set();
+    _isMultiple = false;
+    _isSearchable = false;
 
     constructor() {
         super();
 
         this._internals = this.attachInternals();
+    }
+
+    get options() {
+        return [...this._options];
+    }
+
+    set options(value) {
+        this._options = value;
+        this._selected.clear();
+        this._renderOptions();
+        this._syncFormValue();
+    }
+
+    get value() {
+        return [...this._selected].join(", ");
+    }
+
+    set value(value) {
+        const values = (value ?? "").split(",");
+        this._selected = new Set(
+            values.filter((v) => this._options.includes(v)),
+        );
+
+        this.valueEl.replaceChildren(
+            ...Array.from(this._selected, (v) => this._createTag(v)),
+        );
+
+        if (!this._selected.size) {
+            this.valueEl.textContent = PLACEHOLDER;
+        }
+
+        this._syncFormValue();
+        this._renderOptions(this._getFilteredOptions());
     }
 
     connectedCallback() {
@@ -103,9 +136,9 @@ class CustomSelect extends HTMLElement {
     }
 
     _syncAttributes() {
-        this.isMultiple = this.hasAttribute("multiple");
-        this.isSearchable = this.hasAttribute("searchable");
-        this.classList.toggle("has-search", this.isSearchable);
+        this._isMultiple = this.hasAttribute("multiple");
+        this._isSearchable = this.hasAttribute("searchable");
+        this.classList.toggle("has-search", this._isSearchable);
     }
 
     _bindEvents() {
@@ -147,7 +180,7 @@ class CustomSelect extends HTMLElement {
         this.classList.add("is-open");
         this._positionDropdown();
 
-        if (this.isSearchable) {
+        if (this._isSearchable) {
             this._resetSearch();
             this.searchInput.focus();
         }
@@ -199,7 +232,7 @@ class CustomSelect extends HTMLElement {
     }
 
     _createOptionItem(option) {
-        const isSelected = this.selected.has(option);
+        const isSelected = this._selected.has(option);
 
         const item = document.createElement("li");
         item.className = "select__option";
@@ -219,16 +252,16 @@ class CustomSelect extends HTMLElement {
     }
 
     _selectOption(value) {
-        if (this.isMultiple) {
-            if (this.selected.has(value)) {
-                this.selected.delete(value);
+        if (this._isMultiple) {
+            if (this._selected.has(value)) {
+                this._selected.delete(value);
                 this._removeTag(value);
             } else {
-                this.selected.add(value);
+                this._selected.add(value);
                 this._addTag(value);
             }
         } else {
-            this.selected = new Set([value]);
+            this._selected = new Set([value]);
             this.valueEl.replaceChildren(this._createTag(value));
         }
 
@@ -237,18 +270,18 @@ class CustomSelect extends HTMLElement {
     }
 
     _deselectOption(value) {
-        this.selected.delete(value);
+        this._selected.delete(value);
         this._removeTag(value);
         this._syncFormValue();
         this._renderOptions(this._getFilteredOptions());
     }
 
     _syncFormValue() {
-        this._internals.setFormValue([...this.selected].join(", "));
+        this._internals.setFormValue(this.value);
     }
 
     _addTag(value) {
-        if (this.selected.size === 1) {
+        if (this._selected.size === 1) {
             this.valueEl.replaceChildren();
         }
 
@@ -262,7 +295,7 @@ class CustomSelect extends HTMLElement {
 
         tag?.remove();
 
-        if (this.selected.size === 0) {
+        if (this._selected.size === 0) {
             this.valueEl.textContent = PLACEHOLDER;
         }
     }

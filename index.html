@@ -27,10 +27,37 @@
 
                     <button type="submit">Показать value</button>
                 </form>
+                <button id="check">check</button>
+                <button id="set-options">set options</button>
+                <button id="set-value">set value</button>
             </div>
         </main>
 
         <script>
+            const selectors = document.querySelectorAll("custom-select");
+            const buttonCheck = document.getElementById("check");
+            buttonCheck.addEventListener("click", (event) => {
+                selectors.forEach((item) => {
+                    console.log(item.value);
+                });
+            });
+
+            document
+                .getElementById("set-options")
+                .addEventListener("click", () => {
+                    selectors[0].options = ["A", "B", "C"];
+                    console.log(selectors[0].options);
+                });
+
+            document
+                .getElementById("set-value")
+                .addEventListener("click", () => {
+                    selectors[2].value = "B";
+                    console.log(selectors[2].value);
+                    selectors[2].value = "BeCurly,Carmex";
+                    console.log(selectors[2].value);
+                });
+
             document.getElementById("formElem").onsubmit = (e) => {
                 e.preventDefault();
 
