@@ -265,7 +265,7 @@ class CustomSelect extends HTMLElement {
             (child) => child.dataset.value === value,
         );
 
-        tag?.remove();
+        tag.remove();
 
         if (this.selected.size === 0) {
             this.valueEl.textContent = PLACEHOLDER;
