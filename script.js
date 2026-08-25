@@ -38,10 +38,13 @@ const PLACEHOLDER = "ВЫБЕРИТЕ БРЕНД";
 const EMPTY_MESSAGE = "НИЧЕГО НЕ НАЙДЕНО";
 
 class CustomSelect extends HTMLElement {
+    static formAssociated = true;
+
     constructor() {
         super();
 
-        this.options = BRANDS;
+        this._internals = this.attachInternals();
+        this._options = BRANDS;
         this.selected = new Set();
         this.isMultiple = false;
         this.isSearchable = false;
@@ -164,14 +167,14 @@ class CustomSelect extends HTMLElement {
 
         const { top, bottom } = this.trigger.getBoundingClientRect();
         const spaceBelow = window.innerHeight - bottom;
-        const direction = spaceBelow >= top ? "down" : "up";
 
-        this.dropdown.classList.add(`select__dropdown--${direction}`);
-        this.setMaxHeight(direction === "down" ? spaceBelow : top);
-    }
-
-    setMaxHeight(space) {
-        this.dropdown.style.maxHeight = `${space - 10}px`;
+        if (spaceBelow >= top) {
+            this.dropdown.classList.add("select__dropdown--down");
+            this.dropdown.style.maxHeight = `${spaceBelow - 10}px`;
+        } else {
+            this.dropdown.classList.add("select__dropdown--up");
+            this.dropdown.style.maxHeight = `${top - 10}px`;
+        }
     }
 
     _resetSearch() {
@@ -182,12 +185,12 @@ class CustomSelect extends HTMLElement {
     _getFilteredOptions() {
         const query = this.searchInput.value.trim().toLowerCase();
 
-        return this.options.filter((option) =>
+        return this._options.filter((option) =>
             option.toLowerCase().includes(query),
         );
     }
 
-    _renderOptions(options = this.options) {
+    _renderOptions(options = this._options) {
         if (options.length === 0) {
             this.optionsList.replaceChildren(this._createEmptyItem());
             return;
@@ -231,13 +234,19 @@ class CustomSelect extends HTMLElement {
             this.valueEl.replaceChildren(this._createTag(value));
         }
 
+        this._syncFormValue();
         this._renderOptions(this._getFilteredOptions());
     }
 
     _deselectOption(value) {
         this.selected.delete(value);
         this._removeTag(value);
+        this._syncFormValue();
         this._renderOptions(this._getFilteredOptions());
+    }
+
+    _syncFormValue() {
+        this._internals.setFormValue([...this.selected].join(", "));
     }
 
     _addTag(value) {

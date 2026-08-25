@@ -12,14 +12,36 @@
             <h1>🎀Селекторы🎀</h1>
 
             <div class="selects__wrapper">
-                <custom-select></custom-select>
+                <form id="formElem">
+                    <custom-select name="select 1"></custom-select>
 
-                <custom-select searchable></custom-select>
+                    <custom-select name="select 2" searchable></custom-select>
 
-                <custom-select multiple></custom-select>
+                    <custom-select name="select 3" multiple></custom-select>
 
-                <custom-select searchable multiple></custom-select>
+                    <custom-select
+                        name="select 4"
+                        searchable
+                        multiple
+                    ></custom-select>
+
+                    <button type="submit">Показать value</button>
+                </form>
             </div>
         </main>
+
+        <script>
+            document.getElementById("formElem").onsubmit = (e) => {
+                e.preventDefault();
+
+                let response = new FormData(e.target);
+
+                console.log(response.get("select 3"));
+
+                for (let [name, value] of response) {
+                    alert(`${name}: ${value}`);
+                }
+            };
+        </script>
     </body>
 </html>

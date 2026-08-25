@@ -35,6 +35,10 @@ custom-select {
     height: min-content;
 }
 
+form {
+    display: contents;
+}
+
 .selects__wrapper {
     display: flex;
     gap: 20px;
