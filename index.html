@@ -9,37 +9,16 @@
     <body>
         <script src="script.js"></script>
         <main>
-            <h1>🎀Селектор🎀</h1>
+            <h1>🎀Селекторы🎀</h1>
 
-            <fieldset class="settings">
-                <legend>Настройки</legend>
+            <div class="selects__wrapper">
+                <custom-select></custom-select>
 
-                <label class="settings__item">
-                    <input type="checkbox" id="toggle-search" />
-                    Поиск
-                </label>
+                <custom-select searchable></custom-select>
 
-                <label class="settings__item">
-                    <input type="checkbox" id="toggle-multiple" />
-                    Мультиселект
-                </label>
-            </fieldset>
+                <custom-select multiple></custom-select>
 
-            <div class="select" id="select">
-                <button type="button" class="select__trigger">
-                    <span class="select__value">ВЫБЕРИТЕ БРЕНД</span>
-                </button>
-
-                <div class="select__dropdown">
-                    <input
-                        type="text"
-                        class="select__search"
-                        placeholder="Поиск"
-                    />
-                    <div class="select__wrapper">
-                        <ul class="select__options"></ul>
-                    </div>
-                </div>
+                <custom-select searchable multiple></custom-select>
             </div>
         </main>
     </body>

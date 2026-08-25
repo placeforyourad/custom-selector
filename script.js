@@ -37,31 +37,69 @@ const BRANDS = [
 const PLACEHOLDER = "ВЫБЕРИТЕ БРЕНД";
 const EMPTY_MESSAGE = "НИЧЕГО НЕ НАЙДЕНО";
 
-class CustomSelect {
-    constructor(root, options) {
-        this.root = root;
-        this.options = options;
+class CustomSelect extends HTMLElement {
+    constructor() {
+        super();
 
-        this.trigger = root.querySelector(".select__trigger");
-        this.valueEl = root.querySelector(".select__value");
-        this.dropdown = root.querySelector(".select__dropdown");
-        this.searchInput = root.querySelector(".select__search");
-        this.optionsList = root.querySelector(".select__options");
-
+        this.options = BRANDS;
         this.selected = new Set();
         this.isMultiple = false;
         this.isSearchable = false;
+    }
 
+    connectedCallback() {
+        this.renderDOM();
+        this.syncAttributes();
         this.bindEvents();
         this.renderOptions(this.options);
 
         this.resizeObserver = new ResizeObserver(() => {
-            if (this.root.classList.contains("is-open")) {
+            if (this.classList.contains("is-open")) {
                 this.updateDropdownHeight();
             }
         });
 
         this.resizeObserver.observe(this.trigger);
+    }
+
+    renderDOM() {
+        this.trigger = document.createElement("button");
+        this.trigger.type = "button";
+        this.trigger.className = "select__trigger";
+
+        this.valueEl = document.createElement("span");
+        this.valueEl.className = "select__value";
+        this.valueEl.textContent = PLACEHOLDER;
+        this.trigger.append(this.valueEl);
+
+        this.searchInput = document.createElement("input");
+        this.searchInput.type = "text";
+        this.searchInput.className = "select__search";
+        this.searchInput.placeholder = "Поиск";
+
+        this.optionsList = document.createElement("ul");
+        this.optionsList.className = "select__options";
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "select__wrapper";
+        wrapper.append(this.optionsList);
+
+        this.dropdown = document.createElement("div");
+        this.dropdown.className = "select__dropdown";
+        this.dropdown.append(this.searchInput, wrapper);
+
+        this.append(this.trigger, this.dropdown);
+    }
+
+    disconnectedCallback() {
+        this.resizeObserver.disconnect();
+        document.removeEventListener("click", this._onDocumentClick);
+    }
+
+    syncAttributes() {
+        this.isMultiple = this.hasAttribute("multiple");
+        this.isSearchable = this.hasAttribute("searchable");
+        this.classList.toggle("has-search", this.isSearchable);
     }
 
     bindEvents() {
@@ -89,15 +127,16 @@ class CustomSelect {
             this.renderOptions(this.getFilteredOptions());
         });
 
-        document.addEventListener("click", (event) => {
-            if (!this.root.contains(event.target)) {
+        this._onDocumentClick = (event) => {
+            if (!this.contains(event.target)) {
                 this.close();
             }
-        });
+        };
+        document.addEventListener("click", this._onDocumentClick);
     }
 
     toggleOpen() {
-        if (this.root.classList.contains("is-open")) {
+        if (this.classList.contains("is-open")) {
             this.close();
         } else {
             this.open();
@@ -105,7 +144,7 @@ class CustomSelect {
     }
 
     open() {
-        this.root.classList.add("is-open");
+        this.classList.add("is-open");
         this.positionDropdown();
 
         if (this.isSearchable) {
@@ -115,7 +154,7 @@ class CustomSelect {
     }
 
     close() {
-        this.root.classList.remove("is-open");
+        this.classList.remove("is-open");
     }
 
     positionDropdown() {
@@ -212,19 +251,6 @@ class CustomSelect {
         this.renderOptions(this.getFilteredOptions());
     }
 
-    renderValue() {
-        this.valueEl.replaceChildren();
-
-        if (this.selected.size === 0) {
-            this.valueEl.textContent = PLACEHOLDER;
-            return;
-        }
-
-        this.selected.forEach((value) =>
-            this.valueEl.append(this.createTag(value)),
-        );
-    }
-
     addTag(value) {
         if (this.selected.size === 1) {
             this.valueEl.replaceChildren();
@@ -237,7 +263,8 @@ class CustomSelect {
         const tag = [...this.valueEl.children].find(
             (child) => child.dataset.value === value,
         );
-        tag.remove();
+
+        tag?.remove();
 
         if (this.selected.size === 0) {
             this.valueEl.textContent = PLACEHOLDER;
@@ -252,35 +279,6 @@ class CustomSelect {
 
         return tag;
     }
-
-    set searchable(value) {
-        this.isSearchable = value;
-        this.root.classList.toggle("has-search", value);
-        this.resetSearch();
-    }
-
-    set multiple(value) {
-        this.isMultiple = value;
-        if (!value && this.selected.size > 1) {
-            this.selected = new Set([[...this.selected].at(-1)]);
-        }
-        this.renderValue();
-        this.renderOptions(this.getFilteredOptions());
-    }
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-    const select = new CustomSelect(document.getElementById("select"), BRANDS);
-
-    document
-        .getElementById("toggle-search")
-        .addEventListener("change", (event) => {
-            select.searchable = event.target.checked;
-        });
-
-    document
-        .getElementById("toggle-multiple")
-        .addEventListener("change", (event) => {
-            select.multiple = event.target.checked;
-        });
-});
+customElements.define("custom-select", CustomSelect);
