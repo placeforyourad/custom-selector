@@ -91,12 +91,14 @@ class CustomSelect extends HTMLElement {
         this.dropdown.className = "select__dropdown";
         this.dropdown.append(this.searchInput, wrapper);
 
-        this.append(this.trigger, this.dropdown);
+        this.overlay = document.createElement("div");
+        this.overlay.className = "select__overlay";
+
+        this.append(this.trigger, this.overlay, this.dropdown);
     }
 
     disconnectedCallback() {
         this.resizeObserver.disconnect();
-        document.removeEventListener("click", this._onDocumentClick);
     }
 
     _syncAttributes() {
@@ -129,12 +131,7 @@ class CustomSelect extends HTMLElement {
             this._renderOptions(this._getFilteredOptions());
         });
 
-        this._onDocumentClick = (event) => {
-            if (!this.contains(event.target)) {
-                this._close();
-            }
-        };
-        document.addEventListener("click", this._onDocumentClick);
+        this.overlay.addEventListener("click", () => this._close());
     }
 
     _toggleOpen() {
