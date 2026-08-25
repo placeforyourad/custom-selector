@@ -51,10 +51,11 @@ class CustomSelect extends HTMLElement {
         this.renderDOM();
         this.syncAttributes();
         this.bindEvents();
-        this.renderOptions(this.options);
+        this.renderOptions();
 
         this.resizeObserver = new ResizeObserver(() => {
             if (this.classList.contains("is-open")) {
+                this.positionDropdown();
                 this.updateDropdownHeight();
             }
         });
@@ -184,7 +185,7 @@ class CustomSelect extends HTMLElement {
 
     resetSearch() {
         this.searchInput.value = "";
-        this.renderOptions(this.options);
+        this.renderOptions();
     }
 
     getFilteredOptions() {
@@ -195,7 +196,7 @@ class CustomSelect extends HTMLElement {
         );
     }
 
-    renderOptions(options) {
+    renderOptions(options = this.options) {
         this.optionsList.replaceChildren();
 
         if (options.length === 0) {
