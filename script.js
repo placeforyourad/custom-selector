@@ -57,7 +57,20 @@ class CustomSelect extends HTMLElement {
 
     set options(value) {
         this._options = value;
-        this._selected.clear();
+        this._selected.forEach((v) => {
+            if (!value.includes(v)) {
+                this._selected.delete(v);
+            }
+        });
+
+        this.valueEl.replaceChildren(
+            ...Array.from(this._selected, (v) => this._createTag(v)),
+        );
+
+        if (!this._selected.size) {
+            this.valueEl.textContent = PLACEHOLDER;
+        }
+
         this._renderOptions();
         this._syncFormValue();
     }
