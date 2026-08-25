@@ -40,14 +40,15 @@ const EMPTY_MESSAGE = "НИЧЕГО НЕ НАЙДЕНО";
 class CustomSelect extends HTMLElement {
     static formAssociated = true;
 
+    _options = BRANDS;
+    selected = new Set();
+    isMultiple = false;
+    isSearchable = false;
+
     constructor() {
         super();
 
         this._internals = this.attachInternals();
-        this._options = BRANDS;
-        this.selected = new Set();
-        this.isMultiple = false;
-        this.isSearchable = false;
     }
 
     connectedCallback() {
