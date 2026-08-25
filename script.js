@@ -48,22 +48,21 @@ class CustomSelect extends HTMLElement {
     }
 
     connectedCallback() {
-        this.renderDOM();
-        this.syncAttributes();
-        this.bindEvents();
-        this.renderOptions();
+        this._renderDOM();
+        this._syncAttributes();
+        this._bindEvents();
+        this._renderOptions();
 
         this.resizeObserver = new ResizeObserver(() => {
             if (this.classList.contains("is-open")) {
-                this.positionDropdown();
-                this.updateDropdownHeight();
+                this._positionDropdown();
             }
         });
 
         this.resizeObserver.observe(this.trigger);
     }
 
-    renderDOM() {
+    _renderDOM() {
         this.trigger = document.createElement("button");
         this.trigger.type = "button";
         this.trigger.className = "select__trigger";
@@ -97,21 +96,20 @@ class CustomSelect extends HTMLElement {
         document.removeEventListener("click", this._onDocumentClick);
     }
 
-    syncAttributes() {
+    _syncAttributes() {
         this.isMultiple = this.hasAttribute("multiple");
         this.isSearchable = this.hasAttribute("searchable");
         this.classList.toggle("has-search", this.isSearchable);
     }
 
-    bindEvents() {
-        this.trigger.addEventListener("click", () => this.toggleOpen());
+    _bindEvents() {
+        this.trigger.addEventListener("click", () => this._toggleOpen());
 
         this.valueEl.addEventListener("click", (event) => {
             const tag = event.target.closest(".select__tag");
 
             if (tag) {
-                event.stopPropagation();
-                this.deselectOption(tag.dataset.value);
+                this._deselectOption(tag.dataset.value);
             }
         });
 
@@ -120,45 +118,45 @@ class CustomSelect extends HTMLElement {
             const option = event.target.closest(".select__option[data-value]");
 
             if (option) {
-                this.selectOption(option.dataset.value);
+                this._selectOption(option.dataset.value);
             }
         });
 
         this.searchInput.addEventListener("input", () => {
-            this.renderOptions(this.getFilteredOptions());
+            this._renderOptions(this._getFilteredOptions());
         });
 
         this._onDocumentClick = (event) => {
             if (!this.contains(event.target)) {
-                this.close();
+                this._close();
             }
         };
         document.addEventListener("click", this._onDocumentClick);
     }
 
-    toggleOpen() {
+    _toggleOpen() {
         if (this.classList.contains("is-open")) {
-            this.close();
+            this._close();
         } else {
-            this.open();
+            this._open();
         }
     }
 
-    open() {
+    _open() {
         this.classList.add("is-open");
-        this.positionDropdown();
+        this._positionDropdown();
 
         if (this.isSearchable) {
-            this.resetSearch();
+            this._resetSearch();
             this.searchInput.focus();
         }
     }
 
-    close() {
+    _close() {
         this.classList.remove("is-open");
     }
 
-    positionDropdown() {
+    _positionDropdown() {
         this.dropdown.classList.remove(
             "select__dropdown--down",
             "select__dropdown--up",
@@ -172,23 +170,16 @@ class CustomSelect extends HTMLElement {
         this.setMaxHeight(direction === "down" ? spaceBelow : top);
     }
 
-    updateDropdownHeight() {
-        // Пересчитывает max-height
-        const isUp = this.dropdown.classList.contains("select__dropdown--up");
-        const { top, bottom } = this.trigger.getBoundingClientRect();
-        this.setMaxHeight(isUp ? top : window.innerHeight - bottom);
-    }
-
     setMaxHeight(space) {
         this.dropdown.style.maxHeight = `${space - 10}px`;
     }
 
-    resetSearch() {
+    _resetSearch() {
         this.searchInput.value = "";
-        this.renderOptions();
+        this._renderOptions();
     }
 
-    getFilteredOptions() {
+    _getFilteredOptions() {
         const query = this.searchInput.value.trim().toLowerCase();
 
         return this.options.filter((option) =>
@@ -196,20 +187,17 @@ class CustomSelect extends HTMLElement {
         );
     }
 
-    renderOptions(options = this.options) {
-        this.optionsList.replaceChildren();
-
+    _renderOptions(options = this.options) {
         if (options.length === 0) {
-            this.optionsList.append(this.createEmptyItem());
+            this.optionsList.replaceChildren(this._createEmptyItem());
             return;
         }
 
-        options.forEach((option) =>
-            this.optionsList.append(this.createOptionItem(option)),
-        );
+        const items = options.map((option) => this._createOptionItem(option));
+        this.optionsList.replaceChildren(...items);
     }
 
-    createOptionItem(option) {
+    _createOptionItem(option) {
         const isSelected = this.selected.has(option);
 
         const item = document.createElement("li");
@@ -221,7 +209,7 @@ class CustomSelect extends HTMLElement {
         return item;
     }
 
-    createEmptyItem() {
+    _createEmptyItem() {
         const item = document.createElement("li");
         item.className = "select__option select__option--empty";
         item.textContent = EMPTY_MESSAGE;
@@ -229,50 +217,50 @@ class CustomSelect extends HTMLElement {
         return item;
     }
 
-    selectOption(value) {
+    _selectOption(value) {
         if (this.isMultiple) {
             if (this.selected.has(value)) {
                 this.selected.delete(value);
-                this.removeTag(value);
+                this._removeTag(value);
             } else {
                 this.selected.add(value);
-                this.addTag(value);
+                this._addTag(value);
             }
         } else {
             this.selected = new Set([value]);
-            this.valueEl.replaceChildren(this.createTag(value));
+            this.valueEl.replaceChildren(this._createTag(value));
         }
 
-        this.renderOptions(this.getFilteredOptions());
+        this._renderOptions(this._getFilteredOptions());
     }
 
-    deselectOption(value) {
+    _deselectOption(value) {
         this.selected.delete(value);
-        this.removeTag(value);
-        this.renderOptions(this.getFilteredOptions());
+        this._removeTag(value);
+        this._renderOptions(this._getFilteredOptions());
     }
 
-    addTag(value) {
+    _addTag(value) {
         if (this.selected.size === 1) {
             this.valueEl.replaceChildren();
         }
 
-        this.valueEl.append(this.createTag(value));
+        this.valueEl.append(this._createTag(value));
     }
 
-    removeTag(value) {
+    _removeTag(value) {
         const tag = [...this.valueEl.children].find(
             (child) => child.dataset.value === value,
         );
 
-        tag.remove();
+        tag?.remove();
 
         if (this.selected.size === 0) {
             this.valueEl.textContent = PLACEHOLDER;
         }
     }
 
-    createTag(value) {
+    _createTag(value) {
         const tag = document.createElement("span");
         tag.className = "select__tag";
         tag.dataset.value = value;
